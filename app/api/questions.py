@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
 from app.utils.database import get_db
 from app.schemas.question import Question, QuestionSubmit, QuestionResult
 import json
@@ -72,7 +73,7 @@ if not os.path.exists(QUESTIONS_FILE):
 with open(QUESTIONS_FILE, "r", encoding="utf-8") as f:
     questions_data = json.load(f)
 
-@router.get("/", response_model=list[Question])
+@router.get("/", response_model=List[Question])
 def get_questions():
     """
     获取创业题库
