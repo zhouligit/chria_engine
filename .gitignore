@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Testing
+*.coverage
+coverage/
+
+# Production
+*.egg-info/
+.dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
