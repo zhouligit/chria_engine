@@ -13,11 +13,11 @@ router = APIRouter()
 class ProjectInfo(BaseModel):
     name: str
     industry: str
-    business_model: str
+    description: str
 
 class DefenseSubmit(BaseModel):
-    question: str
-    defense: str
+    question_id: str
+    response: str
     style: str = "vc"
 
 @router.post("/question", response_model=Dict)
@@ -60,12 +60,12 @@ def submit_defense(defense: DefenseSubmit, request: Request, db: Session = Depen
         raise HTTPException(status_code=400, detail="风格不存在")
     
     # 获取AI回应
-    response = ai_service.get_defense_response(defense.question, defense.defense, defense.style)
+    response = ai_service.get_defense_response(defense.question_id, defense.response, defense.style)
     
     # 构建结果
     result = {
-        "question": defense.question,
-        "defense": defense.defense,
+        "question_id": defense.question_id,
+        "response": defense.response,
         "style": defense.style,
         "response": response
     }
@@ -77,7 +77,7 @@ def submit_defense(defense: DefenseSubmit, request: Request, db: Session = Depen
         submission_data = SubmissionCreate(
             module_type="defense",
             module_id="general",
-            answers={"question": defense.question, "defense": defense.defense, "style": defense.style},
+            answers={"question_id": defense.question_id, "response": defense.response, "style": defense.style},
             result=result
         )
         submission_service.create_submission(user_id, submission_data)
