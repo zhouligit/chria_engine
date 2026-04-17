@@ -60,6 +60,7 @@ class AIService:
         ]
         
         return {
+            "id": "defense_1",
             "question": mock_questions[0],
             "round": 1
         }
