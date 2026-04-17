@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # 获取数据库URL
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app/data/database.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////opt/chuangye/data/database.db")
 
 # 创建数据库引擎
 engine = create_engine(
