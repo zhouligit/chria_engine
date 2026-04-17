@@ -45,3 +45,8 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+# API 根路径
+@app.get("/api")
+async def api_root():
+    return {"message": "Chira Engine API"}
