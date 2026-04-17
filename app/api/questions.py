@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from typing import List
 from app.utils.database import get_db
 from app.schemas.question import Question, QuestionSubmit, QuestionResult
+from app.schemas.submission import SubmissionCreate
+from app.services.submission_service import get_submission_service, SubmissionService
+from app.utils.jwt import verify_token
 import json
 import os
 
@@ -80,8 +83,29 @@ def get_questions():
     """
     return questions_data["questions"]
 
+def get_current_user_id(request: Request) -> int:
+    """
+    从请求头中获取当前用户ID
+    """
+    token = request.headers.get("Authorization")
+    if not token:
+        return None
+    
+    if token.startswith("Bearer "):
+        token = token[7:]
+    
+    payload = verify_token(token)
+    if not payload:
+        return None
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    
+    return int(user_id)
+
 @router.post("/submit", response_model=QuestionResult)
-def submit_answers(answers: QuestionSubmit):
+def submit_answers(answers: QuestionSubmit, request: Request, db: Session = Depends(get_db)):
     """
     提交答案
     """
@@ -124,9 +148,25 @@ def submit_answers(answers: QuestionSubmit):
             message = lvl["message"]
             break
     
-    return {
+    # 构建结果
+    result = {
         "total_score": total_score,
         "level": level,
         "message": message,
         "feedback": feedback
     }
+    
+    # 尝试获取用户ID并存储提交记录
+    user_id = get_current_user_id(request)
+    if user_id:
+        submission_service = get_submission_service(db)
+        submission_data = SubmissionCreate(
+            module_type="questions",
+            module_id="general",
+            answers=[{"question_id": a.question_id, "option_id": a.option_id} for a in answers.answers],
+            score=total_score,
+            result=result
+        )
+        submission_service.create_submission(user_id, submission_data)
+    
+    return result

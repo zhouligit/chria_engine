@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
-from app.api import auth, questions, scenarios, defense, products, share
+from app.api import auth, questions, scenarios, defense, products, share, submissions
 from app.utils.database import Base, engine
 
 # 加载环境变量
@@ -35,6 +35,7 @@ app.include_router(scenarios.router, prefix="/api/scenarios", tags=["情景推�
 app.include_router(defense.router, prefix="/api/defense", tags=["辩护博弈"])
 app.include_router(products.router, prefix="/api/products", tags=["付费产品"])
 app.include_router(share.router, prefix="/api/share", tags=["裂变分享"])
+app.include_router(submissions.router, prefix="/api/submissions", tags=["提交记录"])
 
 # 根路径
 @app.get("/")

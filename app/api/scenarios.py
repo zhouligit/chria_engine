@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.utils.database import get_db
 from app.services.ai_service import ai_service
+from app.schemas.submission import SubmissionCreate
+from app.services.submission_service import get_submission_service, SubmissionService
+from app.utils.jwt import verify_token
 import json
 import os
 from typing import Dict, List
@@ -107,8 +110,29 @@ class ChoiceSubmit(BaseModel):
     option_id: str
     style: str = "vc"
 
+def get_current_user_id(request: Request) -> int:
+    """
+    从请求头中获取当前用户ID
+    """
+    token = request.headers.get("Authorization")
+    if not token:
+        return None
+    
+    if token.startswith("Bearer "):
+        token = token[7:]
+    
+    payload = verify_token(token)
+    if not payload:
+        return None
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    
+    return int(user_id)
+
 @router.post("/submit", response_model=Dict)
-def submit_choice(choice: ChoiceSubmit):
+def submit_choice(choice: ChoiceSubmit, request: Request, db: Session = Depends(get_db)):
     """
     提交选择
     """
@@ -137,10 +161,25 @@ def submit_choice(choice: ChoiceSubmit):
     # 获取AI点评
     ai_comment = ai_service.get_ai_comment(choice.scenario_id, choice.option_id, choice.style)
     
-    return {
+    # 构建结果
+    result = {
         "scenario_id": choice.scenario_id,
         "option_id": choice.option_id,
         "option_text": option["text"],
         "outcome": option["outcome"],
         "ai_comment": ai_comment
     }
+    
+    # 尝试获取用户ID并存储提交记录
+    user_id = get_current_user_id(request)
+    if user_id:
+        submission_service = get_submission_service(db)
+        submission_data = SubmissionCreate(
+            module_type="scenarios",
+            module_id=choice.scenario_id,
+            answers={"option_id": choice.option_id, "style": choice.style},
+            result=result
+        )
+        submission_service.create_submission(user_id, submission_data)
+    
+    return result

@@ -25,3 +25,15 @@ class OrderResponse(BaseModel):
 class ProductContent(BaseModel):
     title: str
     content: dict
+
+class PaymentCreate(BaseModel):
+    order_id: int
+    amount: float
+    payment_method: str = "alipay"
+
+class PaymentResponse(BaseModel):
+    payment_id: str
+    status: str
+    message: str
+    order_id: int
+    amount: float
