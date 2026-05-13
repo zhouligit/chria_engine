@@ -23,7 +23,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # 在生产环境中应该设置具体的前端域名
-    allow_credentials=True,
+    # 与 allow_origins=["*"] 同时 True 时浏览器会拒绝跨域；JWT 走 Authorization 头即可
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
