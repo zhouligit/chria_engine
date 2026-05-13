@@ -77,8 +77,14 @@ def submit_defense(defense: DefenseSubmit, request: Request, db: Session = Depen
         submission_data = SubmissionCreate(
             module_type="defense",
             module_id="general",
-            answers={"question_id": defense.question_id, "response": defense.response, "style": defense.style},
-            result=result
+            answers=[
+                {
+                    "question_id": defense.question_id,
+                    "response": defense.response,
+                    "style": defense.style,
+                }
+            ],
+            result=result,
         )
         submission_service.create_submission(user_id, submission_data)
     

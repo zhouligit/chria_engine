@@ -177,8 +177,8 @@ def submit_choice(choice: ChoiceSubmit, request: Request, db: Session = Depends(
         submission_data = SubmissionCreate(
             module_type="scenarios",
             module_id=choice.scenario_id,
-            answers={"option_id": choice.option_id, "style": choice.style},
-            result=result
+            answers=[{"option_id": choice.option_id, "style": choice.style}],
+            result=result,
         )
         submission_service.create_submission(user_id, submission_data)
     
