@@ -4,7 +4,7 @@ from typing import Optional
 
 class UserBase(BaseModel):
     username: str
-    email: EmailStr
+    email: str
     phone: str
 
 class UserCreate(UserBase):
@@ -19,8 +19,9 @@ class User(UserBase):
     created_at: datetime
     updated_at: Optional[datetime]
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        'from_attributes': True
+    }
 
 class Token(BaseModel):
     access_token: str
